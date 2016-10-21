@@ -1,6 +1,7 @@
 package ical
 
 import (
+	"bufio"
 	"io"
 	"strings"
 
@@ -66,6 +67,43 @@ func (p Property) WriteTo(w io.Writer) error {
 				buf.WriteByte(c)
 			}
 		}
+	}
+
+	fold := true
+	if p.vcal10 {
+		if v, ok := p.params.Get("ENCODING"); ok {
+			if v == "QUOTED-PRINTABLE" {
+				// skip folding. from Data::ICal's comments:
+				// In old vcal, quoted-printable properties have different folding rules.
+				// But some interop tests suggest it's wiser just to not fold for vcal 1.0
+				// at all (in quoted-printable).
+				fold = false
+			}
+		}
+	}
+
+	if fold {
+		foldbuf := bufferPool.Get()
+		defer bufferPool.Release(foldbuf)
+
+		s := bufio.NewScanner(buf)
+		for s.Scan() {
+			txt := s.Text()
+			if len(txt) < 76 {
+				foldbuf.WriteString(txt)
+			} else {
+				for len(txt) > 75 {
+					foldbuf.WriteString(txt[:75])
+					foldbuf.WriteString("\x0d\x0a")
+					txt = txt[75:]
+				}
+				if len(txt) > 0 {
+					foldbuf.WriteString(txt)
+				}
+			}
+		}
+		buf.Reset()
+		foldbuf.WriteTo(buf)
 	}
 
 	buf.WriteString("\x0d\x0a")

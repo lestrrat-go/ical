@@ -1,6 +1,8 @@
 package ical_test
 
 import (
+	"bufio"
+	"bytes"
 	"strings"
 	"testing"
 
@@ -103,4 +105,28 @@ func TestSimpleGen(t *testing.T) {
 			return
 		}
 	})
+}
+
+func TestLineWrap(t *testing.T) {
+	var buf bytes.Buffer
+	for i := 0; i < 300; i++ {
+		buf.WriteByte(byte(i % 26 + 65))
+	}
+
+	todo := ical.NewTodo()
+	todo.AddProperty("summary", buf.String(), nil)
+
+	buf.Reset()
+	todo.WriteTo(&buf)
+
+	t.Logf("%s", buf.String())
+
+	s := bufio.NewScanner(&buf)
+	for s.Scan() {
+		txt := s.Text()
+		if !assert.False(t, len(txt) > 76, "lines are wrapped") {
+			t.Logf("line was: %s", txt)
+			return
+		}
+	}
 }

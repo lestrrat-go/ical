@@ -3,6 +3,7 @@ package ical
 import (
 	"bufio"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -25,7 +26,16 @@ func (p Property) WriteTo(w io.Writer) error {
 	defer bufferPool.Release(buf)
 
 	buf.WriteString(strings.ToUpper(p.name))
-	for pk, pvs := range p.params {
+
+	// parameters need to be sorted, or we risk messing up our tests
+	pnames := make([]string, 0, len(p.params))
+	for pk := range p.params {
+		pnames = append(pnames, pk)
+	}
+
+	sort.Strings(pnames)
+	for _, pk := range pnames {
+		pvs := p.params[pk]
 		buf.WriteByte(';')
 		buf.WriteString(strings.ToUpper(pk))
 		buf.WriteByte('=')

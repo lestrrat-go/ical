@@ -27,9 +27,9 @@ func (p Property) WriteTo(w io.Writer) error {
 	buf.WriteString(strings.ToUpper(p.name))
 	for pk, pvs := range p.params {
 		buf.WriteByte(';')
-		buf.WriteString(pk)
+		buf.WriteString(strings.ToUpper(pk))
 		buf.WriteByte('=')
-		for _, pv := range pvs {
+		for i, pv := range pvs {
 			if strings.IndexByte(pv, '"') > -1 {
 				return errors.Errorf("invalid parameter value (container double quote): '%s'", pv)
 			}
@@ -39,6 +39,9 @@ func (p Property) WriteTo(w io.Writer) error {
 				buf.WriteByte('"')
 			} else {
 				buf.WriteString(pv)
+			}
+			if i < len(pvs)-1 {
+				buf.WriteByte(',')
 			}
 		}
 	}

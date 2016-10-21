@@ -28,9 +28,9 @@ func (p propOptionValue) Get() interface{} {
 	return p.value
 }
 
-func WithParameter(p Parameters) PropertyOption {
+func WithParameters(p Parameters) PropertyOption {
 	return propOptionValue{
-		name: "Parameter",
+		name: "Parameters",
 		value: p,
 	}
 }

@@ -143,3 +143,31 @@ func TestUnknownProps(t *testing.T) {
 		return
 	}
 }
+
+func TestPropParameters(t *testing.T) {
+	todo := ical.NewTodo()
+	todo.AddProperty("summary", "Sum it up.",
+		ical.WithParameters(ical.Parameters{
+			"language": []string{"en-US"},
+			"value": []string{"TEXT"},
+		}),
+	)
+	// example from RFC 2445 4.2.11
+	todo.AddProperty("attendee", "MAILTO:janedoe@host.com",
+		ical.WithParameters(ical.Parameters{
+			"member": []string{"MAILTO:projectA@host.com", "MAILTO:projectB@host.com" },
+		}),
+	)
+
+	expect := strings.Join([]string{
+		`BEGIN:VTODO`,
+		`ATTENDEE;MEMBER="MAILTO:projectA@host.com","MAILTO:projectB@host.com":MAILT`,
+		`O:janedoe@host.com`,
+		`SUMMARY;LANGUAGE=en-US;VALUE=TEXT:Sum it up.`,
+		`END:VTODO`,
+	}, "\r\n") + "\r\n"
+
+	if !assert.Equal(t, expect, todo.String()) {
+		return
+	}
+}

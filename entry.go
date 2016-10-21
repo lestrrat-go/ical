@@ -14,11 +14,11 @@ func noProp(_ string) bool {
 
 func newEntry() *entry {
 	return &entry{
-		crlf:       "\x0d\x0a",
-		isUniqueProp: noProp,
+		crlf:             "\x0d\x0a",
+		isUniqueProp:     noProp,
 		isRepeatableProp: noProp,
-		properties: map[string][]*Property{},
-		uid:        uuid(),
+		properties:       map[string][]*Property{},
+		uid:              uuid(),
 	}
 }
 
@@ -53,6 +53,7 @@ func (e *entry) AddProperty(key, value string, options ...PropertyOption) error 
 			force = option.Get().(bool)
 		}
 	}
+
 	return addProperty(e, key, value, force, params, e.isUniqueProp, e.isRepeatableProp)
 }
 

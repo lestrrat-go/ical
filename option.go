@@ -19,3 +19,26 @@ func WithName(s string) Option {
 		return c.AddProperty("x-wr-calname", s, nil)
 	})
 }
+
+func (p propOptionValue) Name() string {
+	return p.name
+}
+
+func (p propOptionValue) Get() interface{} {
+	return p.value
+}
+
+func WithParameter(p Parameters) PropertyOption {
+	return propOptionValue{
+		name: "Parameter",
+		value: p,
+	}
+}
+
+func WithForce(b bool) PropertyOption {
+	return propOptionValue{
+		name: "Force",
+		value: b,
+	}
+}
+

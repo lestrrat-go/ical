@@ -16,7 +16,7 @@ func TestCreateEvent(t *testing.T) {
 		return
 	}
 
-	e.AddProperty("version", "2.0", nil)
+	e.AddProperty("version", "2.0")
 	t.Logf("%#v", e)
 
 	t.Logf("%s", e.String())

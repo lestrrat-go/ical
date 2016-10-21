@@ -42,8 +42,18 @@ func (e *entry) Entries() <-chan Entry {
 	return ch
 }
 
-func (e *entry) AddProperty(key, value string, params Parameters) error {
-	return addProperty(e, key, value, params, e.isUniqueProp, e.isRepeatableProp)
+func (e *entry) AddProperty(key, value string, options ...PropertyOption) error {
+	var params Parameters
+	var force bool
+	for _, option := range options {
+		switch option.Name() {
+		case "Parameters":
+			params = option.Get().(Parameters)
+		case "Force":
+			force = option.Get().(bool)
+		}
+	}
+	return addProperty(e, key, value, force, params, e.isUniqueProp, e.isRepeatableProp)
 }
 
 func (e *entry) GetProperty(key string) (*Property, bool) {
@@ -119,11 +129,11 @@ func getProperty(e Entry, key string) (*Property, bool) {
 	}
 }
 
-func addProperty(e Entry, key, value string, params Parameters, isUniqueProp, isRepeatableProp func(string) bool) error {
+func addProperty(e Entry, key, value string, force bool, params Parameters, isUniqueProp, isRepeatableProp func(string) bool) error {
 	key = strings.ToLower(key)
 	if isUniqueProp(key) {
 		e.setProperty(NewProperty(key, value, params))
-	} else if isRepeatableProp(key) {
+	} else if isRepeatableProp(key) || strings.HasPrefix(key, "x-") || force {
 		e.appendProperty(NewProperty(key, value, params))
 	} else {
 		return errors.Errorf("invalid property '%s'", key)

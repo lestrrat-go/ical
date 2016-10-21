@@ -29,7 +29,7 @@ func TestSimpleGen(t *testing.T) {
 	for _, p := range props {
 		propn, propv := p[0], p[1]
 		t.Run(propn, func(t *testing.T) {
-			if !assert.NoError(t, todo.AddProperty(propn, propv, nil)) {
+			if !assert.NoError(t, todo.AddProperty(propn, propv)) {
 				return
 			}
 		})
@@ -49,7 +49,6 @@ func TestSimpleGen(t *testing.T) {
 			"URL:http://example.com/todo1",
 			"END:VTODO",
 			"END:VCALENDAR",
-			"END_VCAL",
 		}, "\r\n") + "\r\n"
 
 		if assert.Equal(t, expect, c.String(), "stringification should match") {
@@ -58,7 +57,7 @@ func TestSimpleGen(t *testing.T) {
 	})
 
 	t.Run("second stringification", func(t *testing.T) {
-		todo.AddProperty("suMMaRy", "This one trumps number two, even though weird capitalization!", nil)
+		todo.AddProperty("suMMaRy", "This one trumps number two, even though weird capitalization!")
 
 		expect := strings.Join([]string{
 			`BEGIN:VCALENDAR`,
@@ -71,7 +70,6 @@ func TestSimpleGen(t *testing.T) {
 			`URL:http://example.com/todo1`,
 			`END:VTODO`,
 			`END:VCALENDAR`,
-			`END_VCAL`,
 		}, "\r\n") + "\r\n"
 		if assert.Equal(t, expect, c.String(), "stringification should match") {
 			return
@@ -80,8 +78,8 @@ func TestSimpleGen(t *testing.T) {
 
 	t.Run("third stringification", func(t *testing.T) {
 		event := ical.NewEvent()
-		event.AddProperty("summary", "Awesome party", nil)
-		event.AddProperty("description", "at my \\ place,\nOn 5th St.;", nil)
+		event.AddProperty("summary", "Awesome party")
+		event.AddProperty("description", "at my \\ place,\nOn 5th St.;")
 
 		c.AddEntry(event)
 		expect := strings.Join([]string{
@@ -99,7 +97,6 @@ func TestSimpleGen(t *testing.T) {
 			`SUMMARY:Awesome party`,
 			`END:VEVENT`,
 			`END:VCALENDAR`,
-			`END_VCAL`,
 		}, "\r\n") + "\r\n"
 		if assert.Equal(t, expect, c.String(), "stringification should match") {
 			return
@@ -110,16 +107,14 @@ func TestSimpleGen(t *testing.T) {
 func TestLineWrap(t *testing.T) {
 	var buf bytes.Buffer
 	for i := 0; i < 300; i++ {
-		buf.WriteByte(byte(i % 26 + 65))
+		buf.WriteByte(byte(i%26 + 65))
 	}
 
 	todo := ical.NewTodo()
-	todo.AddProperty("summary", buf.String(), nil)
+	todo.AddProperty("summary", buf.String())
 
 	buf.Reset()
 	todo.WriteTo(&buf)
-
-	t.Logf("%s", buf.String())
 
 	s := bufio.NewScanner(&buf)
 	for s.Scan() {
@@ -128,5 +123,23 @@ func TestLineWrap(t *testing.T) {
 			t.Logf("line was: %s", txt)
 			return
 		}
+	}
+}
+
+func TestUnknownProps(t *testing.T) {
+	todo := ical.NewTodo()
+	todo.AddProperty("summary", "Sum it up.")
+	todo.AddProperty("x-summary", "Experimentally sum it up.")
+	todo.AddProperty("summmmary", "Summmm it up.", ical.WithForce(true))
+
+	expect := strings.Join([]string{
+		`BEGIN:VTODO`,
+		`SUMMARY:Sum it up.`,
+		`SUMMMMARY:Summmm it up.`,
+		`X-SUMMARY:Experimentally sum it up.`,
+		`END:VTODO`,
+	}, "\r\n") + "\r\n"
+	if !assert.Equal(t, expect, todo.String()) {
+		return
 	}
 }

@@ -11,6 +11,16 @@ type Option interface {
 
 type optionFunc func(*ICal) error
 
+type PropertyOption interface {
+	Name() string
+	Get() interface{}
+}
+
+type propOptionValue struct {
+	name string
+	value interface{}
+}
+
 type entry struct {
 	properties map[string][]*Property
 	entries    []Entry
@@ -40,7 +50,7 @@ type Entry interface {
 	getFirstProperty(string) (*Property, bool) // Used internally
 	setProperty(*Property)                     // Used internally
 
-	AddProperty(string, string, Parameters) error
+	AddProperty(string, string, ...PropertyOption) error
 	GetProperty(string) (*Property, bool)
 	Entries() <-chan Entry
 	Properties() <-chan *Property

@@ -41,6 +41,10 @@ type Event struct {
 	*entry
 }
 
+type Timezone struct {
+	*entry
+}
+
 type Todo struct {
 	*entry
 }

@@ -33,12 +33,18 @@ func (e *entry) AddEntry(ent Entry) error {
 func (e *entry) Entries() <-chan Entry {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
-	ch := make(chan Entry, len(e.entries))
+
+	l := len(e.entries)
+	ch := make(chan Entry, l)
+	defer close(ch)
+
+	if l == 0 {
+		return ch
+	}
 
 	for _, ent := range e.entries {
 		ch <- ent
 	}
-	close(ch)
 	return ch
 }
 

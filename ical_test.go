@@ -191,3 +191,11 @@ func TestPropParameters(t *testing.T) {
 		return
 	}
 }
+
+func TestTimezone(t *testing.T) {
+	c, _ := ical.New()
+	if !assert.NoError(t, c.AddEntry(ical.NewTimezone("Asia/Tokyo")), "add timezone") {
+		return
+	}
+	// TODO: Write proper tests
+}

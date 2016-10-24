@@ -104,6 +104,26 @@ func TestSimpleGen(t *testing.T) {
 	})
 }
 
+func TestVariousProperties(t *testing.T) {
+	props := []map[string]string{
+		{"description": "# foo\n\n## bar\n\nbaz baz baz"},
+		{"description": "# foo\n\n## bar\n\n日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語日本語"},
+		{"summary": "Foo bar baz"},
+	}
+	for _, prop := range props {
+		for key, val := range prop {
+			e := ical.NewEvent()
+			if !assert.NoError(t, e.AddProperty(key, val), "should be able to add property '%s'", key) {
+				return
+			}
+			if !assert.NoError(t, e.AddProperty(key, val, ical.WithParameters(ical.Parameters{"language": []string{"en"}})), "should be able to add property '%s' with parameters", key) {
+				return
+			}
+			t.Logf("%s", e.String())
+		}
+	}
+}
+
 func TestLineWrap(t *testing.T) {
 	var buf bytes.Buffer
 	for i := 0; i < 300; i++ {
@@ -149,13 +169,13 @@ func TestPropParameters(t *testing.T) {
 	todo.AddProperty("summary", "Sum it up.",
 		ical.WithParameters(ical.Parameters{
 			"language": []string{"en-US"},
-			"value": []string{"TEXT"},
+			"value":    []string{"TEXT"},
 		}),
 	)
 	// example from RFC 2445 4.2.11
 	todo.AddProperty("attendee", "MAILTO:janedoe@host.com",
 		ical.WithParameters(ical.Parameters{
-			"member": []string{"MAILTO:projectA@host.com", "MAILTO:projectB@host.com" },
+			"member": []string{"MAILTO:projectA@host.com", "MAILTO:projectB@host.com"},
 		}),
 	)
 

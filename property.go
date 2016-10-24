@@ -5,6 +5,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/pkg/errors"
 )
@@ -95,31 +96,38 @@ func (p Property) WriteTo(w io.Writer) error {
 		}
 	}
 
-	if fold {
-		foldbuf := bufferPool.Get()
-		defer bufferPool.Release(foldbuf)
-
-		s := bufio.NewScanner(buf)
-		for s.Scan() {
-			txt := s.Text()
-			if len(txt) < 76 {
-				foldbuf.WriteString(txt)
-			} else {
-				for len(txt) > 75 {
-					foldbuf.WriteString(txt[:75])
-					foldbuf.WriteString("\x0d\x0a")
-					txt = txt[75:]
-				}
-				if len(txt) > 0 {
-					foldbuf.WriteString(txt)
-				}
-			}
-		}
-		buf.Reset()
-		foldbuf.WriteTo(buf)
+	if !fold {
+		_, err := buf.WriteTo(w)
+		return err
 	}
 
-	buf.WriteString("\x0d\x0a")
-	_, err := buf.WriteTo(w)
-	return err
+	foldbuf := bufferPool.Get()
+	defer bufferPool.Release(foldbuf)
+
+	s := bufio.NewScanner(buf)
+	for s.Scan() {
+		txt := s.Text()
+		l := utf8.RuneCountInString(txt)
+
+		if l < 75 {
+			foldbuf.WriteString(txt)
+			foldbuf.WriteString("\x0d\x0a")
+			continue
+		}
+
+		for txt != "" {
+			l = utf8.RuneCountInString(txt)
+			if l > 75 {
+				l = 75
+			}
+			for i := 0; i < l; i++ {
+				r, n := utf8.DecodeRuneInString(txt)
+				txt = txt[n:]
+				foldbuf.WriteRune(r)
+			}
+			foldbuf.WriteString("\x0d\x0a")
+		}
+	}
+	foldbuf.WriteTo(w)
+	return nil
 }

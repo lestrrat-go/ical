@@ -182,7 +182,7 @@ func TestPropParameters(t *testing.T) {
 	expect := strings.Join([]string{
 		`BEGIN:VTODO`,
 		`ATTENDEE;MEMBER="MAILTO:projectA@host.com","MAILTO:projectB@host.com":MAILT`,
-		`O:janedoe@host.com`,
+		` O:janedoe@host.com`,
 		`SUMMARY;LANGUAGE=en-US;VALUE=TEXT:Sum it up.`,
 		`END:VTODO`,
 	}, "\r\n") + "\r\n"
@@ -198,4 +198,5 @@ func TestTimezone(t *testing.T) {
 		return
 	}
 	// TODO: Write proper tests
+	t.Logf("%s", c.String())
 }

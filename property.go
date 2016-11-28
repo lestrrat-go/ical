@@ -1,7 +1,7 @@
 package ical
 
 import (
-	"bufio"
+	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -37,9 +37,12 @@ func (p Property) WriteTo(w io.Writer) error {
 	sort.Strings(pnames)
 	for _, pk := range pnames {
 		pvs := p.params[pk]
+		fmt.Printf("pk = %s\n", pk)
+		fmt.Printf("pvs = %#v\n", pvs)
 		if len(pvs) == 0 { // avoid empty props
 			continue
 		}
+
 		buf.WriteByte(';')
 		buf.WriteString(strings.ToUpper(pk))
 		buf.WriteByte('=')
@@ -100,6 +103,14 @@ func (p Property) WriteTo(w io.Writer) error {
 	}
 
 	if !fold {
+		buf.WriteString("\x0d\x0a")
+		_, err := buf.WriteTo(w)
+		return err
+	}
+
+	txt := buf.String()
+	if utf8.RuneCountInString(txt) <= 75 {
+		buf.WriteString("\x0d\x0a")
 		_, err := buf.WriteTo(w)
 		return err
 	}
@@ -107,29 +118,22 @@ func (p Property) WriteTo(w io.Writer) error {
 	foldbuf := bufferPool.Get()
 	defer bufferPool.Release(foldbuf)
 
-	s := bufio.NewScanner(buf)
-	for s.Scan() {
-		txt := s.Text()
+	lines := 1
+	for len(txt) > 0 {
 		l := utf8.RuneCountInString(txt)
-
-		if l < 75 {
-			foldbuf.WriteString(txt)
-			foldbuf.WriteString("\x0d\x0a")
-			continue
+		if l > 75 {
+			l = 75
 		}
-
-		for txt != "" {
-			l = utf8.RuneCountInString(txt)
-			if l > 75 {
-				l = 75
-			}
-			for i := 0; i < l; i++ {
-				r, n := utf8.DecodeRuneInString(txt)
-				txt = txt[n:]
-				foldbuf.WriteRune(r)
-			}
-			foldbuf.WriteString("\x0d\x0a")
+		if lines > 1 {
+			foldbuf.WriteByte(' ')
 		}
+		for i := 0; i < l; i++ {
+			r, n := utf8.DecodeRuneInString(txt)
+			txt = txt[n:]
+			foldbuf.WriteRune(r)
+		}
+		foldbuf.WriteString("\x0d\x0a")
+		lines++
 	}
 	foldbuf.WriteTo(w)
 	return nil

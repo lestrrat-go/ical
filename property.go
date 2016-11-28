@@ -37,6 +37,9 @@ func (p Property) WriteTo(w io.Writer) error {
 	sort.Strings(pnames)
 	for _, pk := range pnames {
 		pvs := p.params[pk]
+		if len(pvs) == 0 { // avoid empty props
+			continue
+		}
 		buf.WriteByte(';')
 		buf.WriteString(strings.ToUpper(pk))
 		buf.WriteByte('=')

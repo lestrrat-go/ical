@@ -1,0 +1,54 @@
+[
+  {
+    "name": "Timezone",
+    "type": "VTIMEZONE",
+    "optional_unique_properties": [
+      "last-modified",
+      "tzurl"
+    ],
+    "mandatory_unique_properties": [
+      "tzid"
+    ]
+  },
+  {
+    "name": "Todo",
+    "type": "VTODO",
+    "comment": "'due' and 'duration' may not be used with together",
+    "optional_repeatable_properties": [
+      "attach",
+      "attendee",
+      "categories",
+      "comment",
+      "contact",
+      "exdate",
+      "exrule",
+      "request-status",
+      "related-to",
+      "resources",
+      "rdate",
+      "rrule"
+    ],
+    "optional_unique_properties": [
+      "class",
+      "completed",
+      "created",
+      "description",
+      "dtstamp",
+      "dtstart",
+      "due", 
+      "duration",
+      "geo",
+      "last-modified",
+      "location",
+      "organizer",
+      "percent-complete",
+      "priority",
+      "recurrence-id",
+      "sequence",
+      "status",
+      "summary",
+      "uid",
+      "url"
+    ]
+  }
+]

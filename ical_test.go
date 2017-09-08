@@ -3,6 +3,7 @@ package ical_test
 import (
 	"bufio"
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
@@ -134,7 +135,7 @@ func TestLineWrap(t *testing.T) {
 	todo.AddProperty("summary", buf.String())
 
 	buf.Reset()
-	todo.WriteTo(&buf)
+	ical.NewEncoder(&buf).Encode(todo)
 
 	s := bufio.NewScanner(&buf)
 	for s.Scan() {
@@ -194,9 +195,31 @@ func TestPropParameters(t *testing.T) {
 
 func TestTimezone(t *testing.T) {
 	c, _ := ical.New()
-	if !assert.NoError(t, c.AddEntry(ical.NewTimezone("Asia/Tokyo")), "add timezone") {
+	tz := ical.NewTimezone()
+	tz.AddProperty("TZID", "Asia/Tokyo")
+	if !assert.NoError(t, c.AddEntry(tz), "add timezone") {
 		return
 	}
 	// TODO: Write proper tests
 	t.Logf("%s", c.String())
+}
+
+func TestParse(t *testing.T) {
+	file, ok := os.LookupEnv("ICAL_TEST_FILE")
+	if !ok {
+		return
+	}
+
+	f, err := os.Open(file)
+	if !assert.NoError(t, err, `should be able to open ical file`) {
+		return
+	}
+	defer f.Close()
+
+	p := ical.NewParser()
+	ical, err := p.Parse(f)
+	if !assert.NoError(t, err, `p.Parse should succeed`) {
+		return
+	}
+	t.Logf("%#v", ical)
 }

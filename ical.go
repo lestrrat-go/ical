@@ -7,8 +7,8 @@ import (
 
 var bufferPool = bufferpool.New()
 
-func New(options ...Option) (*ICal, error) {
-	c := &ICal{
+func New(options ...Option) (*Calendar, error) {
+	c := &Calendar{
 		entry: newEntry(),
 	}
 	c.typ = "VCALENDAR"
@@ -19,7 +19,7 @@ func New(options ...Option) (*ICal, error) {
 
 	for _, opt := range options {
 		if err := opt.configure(c); err != nil {
-			return nil, errors.Wrap(err, "failed to configure ICal")
+			return nil, errors.Wrap(err, "failed to configure calendar")
 		}
 	}
 

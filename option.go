@@ -1,11 +1,11 @@
 package ical
 
-func (f optionFunc) configure(c *ICal) error {
+func (f optionFunc) configure(c *Calendar) error {
 	return f(c)
 }
 
 func WithVCal10(v bool) Option {
-	return optionFunc(func(c *ICal) error {
+	return optionFunc(func(c *Calendar) error {
 		if v {
 			return c.AddProperty("version", "1.0", nil)
 		} else {
@@ -15,7 +15,7 @@ func WithVCal10(v bool) Option {
 }
 
 func WithName(s string) Option {
-	return optionFunc(func(c *ICal) error {
+	return optionFunc(func(c *Calendar) error {
 		return c.AddProperty("x-wr-calname", s, nil)
 	})
 }

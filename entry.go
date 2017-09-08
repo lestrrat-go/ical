@@ -14,7 +14,6 @@ func noProp(_ string) bool {
 
 func newEntry() *entry {
 	return &entry{
-		crlf:             "\x0d\x0a",
 		isUniqueProp:     noProp,
 		isRepeatableProp: noProp,
 		properties:       map[string][]*Property{},
@@ -127,7 +126,7 @@ func (e *entry) setProperty(p *Property) {
 	list[0] = p
 }
 
-func getProperty(e Entry, key string) (*Property, bool) {
+func getProperty(e legacyEntry, key string) (*Property, bool) {
 	switch key {
 	case "class", "version":
 		return e.getFirstProperty(key)
@@ -136,7 +135,7 @@ func getProperty(e Entry, key string) (*Property, bool) {
 	}
 }
 
-func addProperty(e Entry, key, value string, force bool, params Parameters, isUniqueProp, isRepeatableProp func(string) bool) error {
+func addProperty(e legacyEntry, key, value string, force bool, params Parameters, isUniqueProp, isRepeatableProp func(string) bool) error {
 	key = strings.ToLower(key)
 	if isUniqueProp(key) {
 		e.setProperty(NewProperty(key, value, params))
@@ -147,10 +146,6 @@ func addProperty(e Entry, key, value string, force bool, params Parameters, isUn
 	}
 
 	return nil
-}
-
-func (e *entry) Crlf() string {
-	return e.crlf
 }
 
 func (e *entry) Type() string {
@@ -174,36 +169,14 @@ func (e *entry) String() string {
 }
 
 func (e *entry) WriteTo(w io.Writer) error {
-	return writeEntry(e, w)
+	return NewEncoder(w).Encode(e)
 }
 
-func writeEntry(e Entry, w io.Writer) error {
-	buf := bufferPool.Get()
-	defer bufferPool.Release(buf)
-
-	buf.WriteString("BEGIN:")
-	buf.WriteString(e.Type())
-	buf.WriteString(e.Crlf())
-
-	if v, ok := e.GetProperty("version"); ok {
-		v.WriteTo(buf)
+func (v EntryList) Iterator() <-chan Entry {
+	ch := make(chan Entry, len(v))
+	for _, e := range v {
+		ch <- e
 	}
-
-	for prop := range e.Properties() {
-		if prop.Name() == "version" {
-			continue
-		}
-		prop.WriteTo(buf)
-	}
-
-	for ent := range e.Entries() {
-		ent.WriteTo(buf)
-	}
-
-	buf.WriteString("END:")
-	buf.WriteString(e.Type())
-	buf.WriteString(e.Crlf())
-
-	_, err := buf.WriteTo(w)
-	return err
+	close(ch)
+	return ch
 }

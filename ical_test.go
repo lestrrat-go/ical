@@ -213,9 +213,22 @@ func TestParse(t *testing.T) {
 	defer f.Close()
 
 	p := ical.NewParser()
-	ical, err := p.Parse(f)
+	c, err := p.Parse(f)
 	if !assert.NoError(t, err, `p.Parse should succeed`) {
 		return
 	}
-	t.Logf("%s", ical.String())
+
+	var buf bytes.Buffer
+	if !assert.NoError(t, ical.NewEncoder(&buf).Encode(c), `encode should succeed`) {
+		return
+	}
+
+	c2, err := p.Parse(&buf)
+	if !assert.NoError(t, err, `p.Parse should succeed`) {
+		return
+	}
+
+	if !assert.Equal(t, c2, c, `ical objects should match`) {
+		return
+	}
 }

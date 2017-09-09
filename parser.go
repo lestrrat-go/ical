@@ -87,7 +87,9 @@ func (ctx *parseCtx) nextProperty() (string, string, error) {
 			break
 		}
 		ctx.next()
-		val += strings.TrimSpace(l)
+		// Remove first space
+		val += l[1:]
+
 	}
 	return n, strings.Replace(val, "\\", "", -1), nil
 }

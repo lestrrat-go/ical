@@ -1,0 +1,121 @@
+[
+  {
+    "name": "Calendar",
+    "skip_constructor": false,
+    "type": "VCALENDAR",
+    "optional_unique_properties": [
+      "prodid",
+      "version",
+      "calscale",
+      "method"
+    ]
+  },
+  {
+    "name": "Event",
+    "type": "VEVENT",
+    "comment": "duration and dtend may not be specified together",
+    "optional_unique_properties": [
+      "class",
+      "created",
+      "description",
+      "dtstamp",
+      "dtstart",
+      "dtend",
+      "duration",
+      "geo",
+      "last-modified",
+      "location",
+      "organizer",
+      "priority",
+      "sequence",
+      "status",
+      "summary",
+      "transp",
+      "uid",
+      "url",
+      "recurrence-id"
+    ]
+  },
+  {
+    "name": "Timezone",
+    "type": "VTIMEZONE",
+    "optional_unique_properties": [
+      "last-modified",
+      "tzurl"
+    ],
+    "mandatory_unique_properties": [
+      "tzid"
+    ]
+  },
+  {
+    "name": "Todo",
+    "type": "VTODO",
+    "comment": "'due' and 'duration' may not be used with together",
+    "optional_repeatable_properties": [
+      "attach",
+      "attendee",
+      "categories",
+      "comment",
+      "contact",
+      "exdate",
+      "exrule",
+      "request-status",
+      "related-to",
+      "resources",
+      "rdate",
+      "rrule"
+    ],
+    "optional_unique_properties": [
+      "class",
+      "completed",
+      "created",
+      "description",
+      "dtstamp",
+      "dtstart",
+      "due", 
+      "duration",
+      "geo",
+      "last-modified",
+      "location",
+      "organizer",
+      "percent-complete",
+      "priority",
+      "recurrence-id",
+      "sequence",
+      "status",
+      "summary",
+      "uid",
+      "url"
+    ]
+  },
+  {
+    "name": "Daylight",
+    "type": "DAYLIGHT",
+    "mandatory_unique_properties": [
+      "dtstart",
+      "tzeoffsetto",
+      "tzeoffsetfrom"
+    ],
+    "optional_repeatable_properties": [
+      "comment",
+      "rdate",
+      "rrule",
+      "tzname"
+    ]
+  },
+  {
+    "name": "Standard",
+    "type": "STANDARD",
+    "mandatory_unique_properties": [
+      "dtstart",
+      "tzeoffsetto",
+      "tzeoffsetfrom"
+    ],
+    "optional_repeatable_properties": [
+      "comment",
+      "rdate",
+      "rrule",
+      "tzname"
+    ]
+  }
+]

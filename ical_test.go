@@ -3,6 +3,7 @@ package ical_test
 import (
 	"bufio"
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 
@@ -11,11 +12,7 @@ import (
 )
 
 func TestSimpleGen(t *testing.T) {
-	c, err := ical.New()
-	if !assert.NoError(t, err, "ical.New should succeed") {
-		return
-	}
-
+	c := ical.New()
 	todo := ical.NewTodo()
 
 	props := [][]string{
@@ -134,7 +131,7 @@ func TestLineWrap(t *testing.T) {
 	todo.AddProperty("summary", buf.String())
 
 	buf.Reset()
-	todo.WriteTo(&buf)
+	ical.NewEncoder(&buf).Encode(todo)
 
 	s := bufio.NewScanner(&buf)
 	for s.Scan() {
@@ -193,10 +190,39 @@ func TestPropParameters(t *testing.T) {
 }
 
 func TestTimezone(t *testing.T) {
-	c, _ := ical.New()
-	if !assert.NoError(t, c.AddEntry(ical.NewTimezone("Asia/Tokyo")), "add timezone") {
+	c := ical.New()
+	tz := ical.NewTimezone()
+	tz.AddProperty("TZID", "Asia/Tokyo")
+	if !assert.NoError(t, c.AddEntry(tz), "add timezone") {
 		return
 	}
 	// TODO: Write proper tests
 	t.Logf("%s", c.String())
+}
+
+func TestParse(t *testing.T) {
+	file, ok := os.LookupEnv("ICAL_TEST_FILE")
+	if !ok {
+		return
+	}
+
+	p := ical.NewParser()
+	c, err := p.ParseFile(file)
+	if !assert.NoError(t, err, `p.Parse should succeed`) {
+		return
+	}
+
+	var buf bytes.Buffer
+	if !assert.NoError(t, ical.NewEncoder(&buf).Encode(c), `encode should succeed`) {
+		return
+	}
+
+	c2, err := p.Parse(&buf)
+	if !assert.NoError(t, err, `p.Parse should succeed`) {
+		return
+	}
+
+	if !assert.Equal(t, c2, c, `ical objects should match`) {
+		return
+	}
 }

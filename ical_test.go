@@ -206,14 +206,8 @@ func TestParse(t *testing.T) {
 		return
 	}
 
-	f, err := os.Open(file)
-	if !assert.NoError(t, err, `should be able to open ical file`) {
-		return
-	}
-	defer f.Close()
-
 	p := ical.NewParser()
-	c, err := p.Parse(f)
+	c, err := p.ParseFile(file)
 	if !assert.NoError(t, err, `p.Parse should succeed`) {
 		return
 	}

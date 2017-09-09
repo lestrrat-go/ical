@@ -3,6 +3,7 @@ package ical
 import (
 	"bufio"
 	"io"
+	"os"
 	"regexp"
 	"strings"
 
@@ -25,6 +26,16 @@ type parseCtx struct {
 	parent   container
 	scanner  *bufio.Scanner
 	readbuf  []string
+}
+
+func (p *Parser) ParseFile(filename string) (*Calendar, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, errors.Wrapf(err, `failed to open %s for reading`, filename)
+	}
+	defer f.Close()
+
+	return p.Parse(f)
 }
 
 var childEntries = map[string][]string{

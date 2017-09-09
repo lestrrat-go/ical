@@ -6,10 +6,10 @@ import (
 )
 
 type Option interface {
-	configure(*Calendar) error
+	configure(*Calendar)
 }
 
-type optionFunc func(*Calendar) error
+type optionFunc func(*Calendar)
 
 type PropertyOption interface {
 	Name() string
@@ -19,31 +19,6 @@ type PropertyOption interface {
 type propOptionValue struct {
 	name  string
 	value interface{}
-}
-
-type entry struct {
-	properties       map[string][]*Property
-	entries          []Entry
-	isUniqueProp     func(string) bool
-	isRepeatableProp func(string) bool
-	mutex            sync.Mutex
-	typ              string
-	rfcStrict        bool
-	uid              string
-}
-
-type Calendar struct {
-	*entry
-}
-
-type Event struct {
-	*entry
-}
-
-type legacyEntry interface {
-	appendProperty(*Property)                  // Used internally
-	getFirstProperty(string) (*Property, bool) // Used internally
-	setProperty(*Property)                     // Used internally
 }
 
 type Entry interface {

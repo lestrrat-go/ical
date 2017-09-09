@@ -97,10 +97,7 @@ func (ctx *parseCtx) parseCalendar() error {
 		return err
 	}
 
-	v, err := New()
-	if err != nil {
-		return errors.Wrap(err, `failed to create new ical`)
-	}
+	v := New()
 	ctx.calendar = v
 	ctx.parent = v
 

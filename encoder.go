@@ -1,7 +1,6 @@
 package ical
 
 import (
-	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -68,8 +67,6 @@ func (enc *Encoder) EncodeProperty(p *Property) error {
 	sort.Strings(pnames)
 	for _, pk := range pnames {
 		pvs := p.params[pk]
-		fmt.Printf("pk = %s\n", pk)
-		fmt.Printf("pvs = %#v\n", pvs)
 		if len(pvs) == 0 { // avoid empty props
 			continue
 		}

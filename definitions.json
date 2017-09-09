@@ -1,5 +1,42 @@
 [
   {
+    "name": "Calendar",
+    "skip_constructor": false,
+    "type": "VCALENDAR",
+    "optional_unique_properties": [
+      "prodid",
+      "version",
+      "calscale",
+      "method"
+    ]
+  },
+  {
+    "name": "Event",
+    "type": "VEVENT",
+    "comment": "duration and dtend may not be specified together",
+    "optional_unique_properties": [
+      "class",
+      "created",
+      "description",
+      "dtstamp",
+      "dtstart",
+      "dtend",
+      "duration",
+      "geo",
+      "last-modified",
+      "location",
+      "organizer",
+      "priority",
+      "sequence",
+      "status",
+      "summary",
+      "transp",
+      "uid",
+      "url",
+      "recurrence-id"
+    ]
+  },
+  {
     "name": "Timezone",
     "type": "VTIMEZONE",
     "optional_unique_properties": [

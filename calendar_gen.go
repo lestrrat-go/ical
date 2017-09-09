@@ -10,45 +10,45 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Todo struct {
+type Calendar struct {
 	entries EntryList
 	props   *PropertySet
 }
 
-func NewTodo() *Todo {
-	return &Todo{
+func NewCalendar() *Calendar {
+	return &Calendar{
 		props: NewPropertySet(),
 	}
 }
 
-func (v *Todo) String() string {
+func (v *Calendar) String() string {
 	var buf bytes.Buffer
 	NewEncoder(&buf).Encode(v)
 	return buf.String()
 }
 
-func (v Todo) Type() string {
-	return "VTODO"
+func (v Calendar) Type() string {
+	return "VCALENDAR"
 }
 
-func (v *Todo) AddEntry(e Entry) error {
+func (v *Calendar) AddEntry(e Entry) error {
 	v.entries.Append(e)
 	return nil
 }
 
-func (v *Todo) Entries() <-chan Entry {
+func (v *Calendar) Entries() <-chan Entry {
 	return v.entries.Iterator()
 }
 
-func (v *Todo) GetProperty(name string) (*Property, bool) {
+func (v *Calendar) GetProperty(name string) (*Property, bool) {
 	return v.props.GetFirst(name)
 }
 
-func (v *Todo) Properties() <-chan *Property {
+func (v *Calendar) Properties() <-chan *Property {
 	return v.props.Iterator()
 }
 
-func (v *Todo) AddProperty(key, value string, options ...PropertyOption) error {
+func (v *Calendar) AddProperty(key, value string, options ...PropertyOption) error {
 	var params Parameters
 	var force bool
 	for _, option := range options {
@@ -61,10 +61,8 @@ func (v *Todo) AddProperty(key, value string, options ...PropertyOption) error {
 	}
 
 	switch key = strings.ToLower(key); key {
-	case "class", "completed", "created", "description", "dtstamp", "dtstart", "due", "duration", "geo", "last-modified", "location", "organizer", "percent-complete", "priority", "recurrence-id", "sequence", "status", "summary", "uid", "url":
+	case "prodid", "version", "calscale", "method":
 		v.props.Set(NewProperty(key, value, params))
-	case "attach", "attendee", "categories", "comment", "contact", "exdate", "exrule", "request-status", "related-to", "resources", "rdate", "rrule":
-		v.props.Append(NewProperty(key, value, params))
 	default:
 		if strings.HasPrefix(key, "x-") || force {
 			v.props.Append(NewProperty(key, value, params))

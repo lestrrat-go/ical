@@ -12,11 +12,7 @@ import (
 )
 
 func TestSimpleGen(t *testing.T) {
-	c, err := ical.New()
-	if !assert.NoError(t, err, "ical.New should succeed") {
-		return
-	}
-
+	c := ical.New()
 	todo := ical.NewTodo()
 
 	props := [][]string{
@@ -194,7 +190,7 @@ func TestPropParameters(t *testing.T) {
 }
 
 func TestTimezone(t *testing.T) {
-	c, _ := ical.New()
+	c := ical.New()
 	tz := ical.NewTimezone()
 	tz.AddProperty("TZID", "Asia/Tokyo")
 	if !assert.NoError(t, c.AddEntry(tz), "add timezone") {

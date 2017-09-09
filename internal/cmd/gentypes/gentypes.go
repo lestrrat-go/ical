@@ -28,6 +28,7 @@ type definition struct {
 	MandatoryUniqueProperties    []string `json:"mandatory_unique_properties"`
 	OptionalRepeatableProperties []string `json:"optional_repeatable_properties"`
 	OptionalUniqueProperties     []string `json:"optional_unique_properties"`
+	SkipConstructor              bool     `json:"skip_constructor"`
 }
 
 func fieldName(s string) string {
@@ -96,11 +97,13 @@ func writeType(def *definition) error {
 	fmt.Fprintf(dst, "\nprops *PropertySet")
 	fmt.Fprintf(dst, "\n}")
 
-	fmt.Fprintf(dst, "\n\nfunc New%s() *%s {", def.Name, def.Name)
-	fmt.Fprintf(dst, "\nreturn &%s{", def.Name)
-	fmt.Fprintf(dst, "\nprops: NewPropertySet(),")
-	fmt.Fprintf(dst, "\n}")
-	fmt.Fprintf(dst, "\n}")
+	if !def.SkipConstructor {
+		fmt.Fprintf(dst, "\n\nfunc New%s() *%s {", def.Name, def.Name)
+		fmt.Fprintf(dst, "\nreturn &%s{", def.Name)
+		fmt.Fprintf(dst, "\nprops: NewPropertySet(),")
+		fmt.Fprintf(dst, "\n}")
+		fmt.Fprintf(dst, "\n}")
+	}
 
 	fmt.Fprintf(dst, "\n\nfunc (v *%s) String() string {", def.Name)
 	fmt.Fprintf(dst, "\nvar buf bytes.Buffer")
@@ -110,6 +113,11 @@ func writeType(def *definition) error {
 
 	fmt.Fprintf(dst, "\n\nfunc (v %s) Type() string {", def.Name)
 	fmt.Fprintf(dst, "\nreturn %s", strconv.Quote(def.Type))
+	fmt.Fprintf(dst, "\n}")
+
+	fmt.Fprintf(dst, "\n\nfunc (v *%s) AddEntry(e Entry) error {", def.Name)
+	fmt.Fprintf(dst, "\nv.entries.Append(e)")
+	fmt.Fprintf(dst, "\nreturn nil")
 	fmt.Fprintf(dst, "\n}")
 
 	fmt.Fprintf(dst, "\n\nfunc (v *%s) Entries() <-chan Entry {", def.Name)

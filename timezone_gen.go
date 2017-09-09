@@ -31,6 +31,11 @@ func (v Timezone) Type() string {
 	return "VTIMEZONE"
 }
 
+func (v *Timezone) AddEntry(e Entry) error {
+	v.entries.Append(e)
+	return nil
+}
+
 func (v *Timezone) Entries() <-chan Entry {
 	return v.entries.Iterator()
 }

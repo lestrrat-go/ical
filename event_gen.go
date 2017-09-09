@@ -10,45 +10,45 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Todo struct {
+type Event struct {
 	entries EntryList
 	props   *PropertySet
 }
 
-func NewTodo() *Todo {
-	return &Todo{
+func NewEvent() *Event {
+	return &Event{
 		props: NewPropertySet(),
 	}
 }
 
-func (v *Todo) String() string {
+func (v *Event) String() string {
 	var buf bytes.Buffer
 	NewEncoder(&buf).Encode(v)
 	return buf.String()
 }
 
-func (v Todo) Type() string {
-	return "VTODO"
+func (v Event) Type() string {
+	return "VEVENT"
 }
 
-func (v *Todo) AddEntry(e Entry) error {
+func (v *Event) AddEntry(e Entry) error {
 	v.entries.Append(e)
 	return nil
 }
 
-func (v *Todo) Entries() <-chan Entry {
+func (v *Event) Entries() <-chan Entry {
 	return v.entries.Iterator()
 }
 
-func (v *Todo) GetProperty(name string) (*Property, bool) {
+func (v *Event) GetProperty(name string) (*Property, bool) {
 	return v.props.GetFirst(name)
 }
 
-func (v *Todo) Properties() <-chan *Property {
+func (v *Event) Properties() <-chan *Property {
 	return v.props.Iterator()
 }
 
-func (v *Todo) AddProperty(key, value string, options ...PropertyOption) error {
+func (v *Event) AddProperty(key, value string, options ...PropertyOption) error {
 	var params Parameters
 	var force bool
 	for _, option := range options {
@@ -61,10 +61,8 @@ func (v *Todo) AddProperty(key, value string, options ...PropertyOption) error {
 	}
 
 	switch key = strings.ToLower(key); key {
-	case "class", "completed", "created", "description", "dtstamp", "dtstart", "due", "duration", "geo", "last-modified", "location", "organizer", "percent-complete", "priority", "recurrence-id", "sequence", "status", "summary", "uid", "url":
+	case "class", "created", "description", "dtstamp", "dtstart", "dtend", "duration", "geo", "last-modified", "location", "organizer", "priority", "sequence", "status", "summary", "transp", "uid", "url", "recurrence-id":
 		v.props.Set(NewProperty(key, value, params))
-	case "attach", "attendee", "categories", "comment", "contact", "exdate", "exrule", "request-status", "related-to", "resources", "rdate", "rrule":
-		v.props.Append(NewProperty(key, value, params))
 	default:
 		if strings.HasPrefix(key, "x-") || force {
 			v.props.Append(NewProperty(key, value, params))

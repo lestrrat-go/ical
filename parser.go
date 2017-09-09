@@ -2,7 +2,6 @@ package ical
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"regexp"
@@ -95,7 +94,7 @@ func (ctx *parseCtx) nextProperty() (string, string, error) {
 		ctx.next()
 		val += strings.TrimSpace(l)
 	}
-	return n, val, nil
+	return n, strings.Replace(val, "\\", "", -1), nil
 }
 
 func (ctx *parseCtx) handlerFor(name string) func() error {
@@ -173,7 +172,6 @@ OUTER:
 		if err != nil {
 			return errors.Wrap(err, `failed to read next property`)
 		}
-		fmt.Printf("name = %s, n = %s\n", name, n)
 		v.AddProperty(n, val)
 	}
 

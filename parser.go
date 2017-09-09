@@ -2,6 +2,7 @@ package ical
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"regexp"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/pkg/errors"
 )
+
+var errUnreachable = errors.New(`can't reach here`)
 
 func NewParser() *Parser {
 	return &Parser{}
@@ -26,11 +29,16 @@ type parseCtx struct {
 	readbuf  []string
 }
 
+var childEntries = map[string][]string{
+	"VCALENDAR": []string{"VTIMEZONE", "VEVENT"},
+	"VTIMEZONE": []string{"DAYLIGHT", "STANDARD"},
+}
+
 func (p *Parser) Parse(src io.Reader) (*Calendar, error) {
 	var ctx parseCtx
 
 	ctx.scanner = bufio.NewScanner(src)
-	if err := ctx.parseCalendar(); err != nil {
+	if err := ctx.parse("VCALENDAR"); err != nil {
 		return nil, errors.Wrap(err, `failed to parse ical`)
 	}
 	log.Printf(ctx.calendar.String())
@@ -90,37 +98,83 @@ func (ctx *parseCtx) nextProperty() (string, string, error) {
 	return n, val, nil
 }
 
-func (ctx *parseCtx) parseCalendar() error {
-	const name = "VCALENDAR"
+func (ctx *parseCtx) handlerFor(name string) func() error {
+	switch name {
+	case "VTIMEZONE":
+		return ctx.parseTimezone
+	case "VEVENT":
+		return ctx.parseEvent
+	case "DAYLIGHT":
+		return ctx.parseDaylight
+	case "STANDARD":
+		return ctx.parseStandard
+	}
+	return func() error { return nil }
+}
+
+func (ctx *parseCtx) entryFor(name string) Entry {
+	switch name {
+	case "VCALENDAR":
+		ctx.calendar = New()
+		return ctx.calendar
+	case "VTIMEZONE":
+		return NewTimezone()
+	case "VEVENT":
+		return NewEvent()
+	case "DAYLIGHT":
+		return NewDaylight()
+	case "STANDARD":
+		return NewStandard()
+	}
+	return nil
+}
+
+func (ctx *parseCtx) parse(name string) error {
+	children := childEntries[name]
 	finalize, check, err := ctx.begin(name)
 	if err != nil {
 		return err
 	}
 
-	v := New()
-	ctx.calendar = v
-	ctx.parent = v
-
+	v := ctx.entryFor(name)
+	if v == nil {
+		return errors.Errorf(`could not create entry for %s`, name)
+	}
+OUTER:
 	for {
 		l, err := ctx.peek()
 		if err != nil {
 			return errors.Wrap(err, `failed to peek`)
 		}
 
-		switch {
-		case strings.HasPrefix(l, "BEGIN:VTIMEZONE"):
-			if err := ctx.parseTimezone(); err != nil {
-				return errors.Wrap(err, `failed to parse timezone`)
+		for _, chld := range children {
+			if l != "BEGIN:"+chld {
+				continue
 			}
-		case check(l):
-			return finalize()
-		default:
-			n, val, err := ctx.nextProperty()
-			if err != nil {
-				return errors.Wrap(err, `failed to read next property`)
+
+			h := ctx.handlerFor(chld)
+			oldp := ctx.parent
+			ctx.parent = v
+			if err := h(); err != nil {
+				return errors.Wrapf(err, `failed to parse %s`, chld)
 			}
-			v.AddProperty(n, val)
+			ctx.parent = oldp
+			continue OUTER
 		}
+
+		if check(l) {
+			if ctx.parent != nil {
+				ctx.parent.AddEntry(v)
+			}
+			return finalize()
+		}
+
+		n, val, err := ctx.nextProperty()
+		if err != nil {
+			return errors.Wrap(err, `failed to read next property`)
+		}
+		fmt.Printf("name = %s, n = %s\n", name, n)
+		v.AddProperty(n, val)
 	}
 
 	return errUnreachable
@@ -157,60 +211,17 @@ func (ctx *parseCtx) begin(name string) (func() error, func(string) bool, error)
 }
 
 func (ctx *parseCtx) parseTimezone() error {
-	finalize, check, err := ctx.begin("VTIMEZONE")
-	if err != nil {
-		return err
-	}
-
-	v := NewTimezone()
-
-	for {
-		l, err := ctx.peek()
-		if err != nil {
-			return errors.Wrap(err, `failed to peek`)
-		}
-		switch {
-		case l == "BEGIN:DAYLIGHT":
-			if err := ctx.parseDaylight(); err != nil {
-				return errors.Wrap(err, `failed to parse timezone`)
-			}
-		case check(l):
-			if v != nil {
-				ctx.parent.AddEntry(v)
-			}
-
-			return finalize()
-		default:
-			n, val, err := ctx.nextProperty()
-			if err != nil {
-				return errors.Wrap(err, `failed to read next property`)
-			}
-			v.AddProperty(n, val)
-		}
-	}
-
-	return errUnreachable
+	return ctx.parse("VTIMEZONE")
 }
 
-var errUnreachable = errors.New(`can't reach here`)
-
 func (ctx *parseCtx) parseDaylight() error {
-	finalize, check, err := ctx.begin("DAYLIGHT")
-	if err != nil {
-		return err
-	}
+	return ctx.parse("DAYLIGHT")
+}
 
-	for {
-		l, err := ctx.peek()
-		if err != nil {
-			return errors.Wrap(err, `failed to peek`)
-		}
-		switch {
-		case check(l):
-			return finalize()
-		default:
-			ctx.next()
-		}
-	}
-	return errUnreachable
+func (ctx *parseCtx) parseStandard() error {
+	return ctx.parse("STANDARD")
+}
+
+func (ctx *parseCtx) parseEvent() error {
+	return ctx.parse("VEVENT")
 }

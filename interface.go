@@ -22,6 +22,7 @@ type propOptionValue struct {
 }
 
 type Entry interface {
+	AddEntry(Entry) error
 	AddProperty(string, string, ...PropertyOption) error
 	GetProperty(string) (*Property, bool)
 	Entries() <-chan Entry

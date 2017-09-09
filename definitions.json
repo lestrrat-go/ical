@@ -87,5 +87,35 @@
       "uid",
       "url"
     ]
+  },
+  {
+    "name": "Daylight",
+    "type": "DAYLIGHT",
+    "mandatory_unique_properties": [
+      "dtstart",
+      "tzeoffsetto",
+      "tzeoffsetfrom"
+    ],
+    "optional_repeatable_properties": [
+      "comment",
+      "rdate",
+      "rrule",
+      "tzname"
+    ]
+  },
+  {
+    "name": "Standard",
+    "type": "STANDARD",
+    "mandatory_unique_properties": [
+      "dtstart",
+      "tzeoffsetto",
+      "tzeoffsetfrom"
+    ],
+    "optional_repeatable_properties": [
+      "comment",
+      "rdate",
+      "rrule",
+      "tzname"
+    ]
   }
 ]

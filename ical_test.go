@@ -217,5 +217,5 @@ func TestParse(t *testing.T) {
 	if !assert.NoError(t, err, `p.Parse should succeed`) {
 		return
 	}
-	t.Logf("%#v", ical)
+	t.Logf("%s", ical.String())
 }

@@ -3,7 +3,6 @@ package ical
 import (
 	"bufio"
 	"io"
-	"log"
 	"regexp"
 	"strings"
 
@@ -40,14 +39,10 @@ func (p *Parser) Parse(src io.Reader) (*Calendar, error) {
 	if err := ctx.parse("VCALENDAR"); err != nil {
 		return nil, errors.Wrap(err, `failed to parse ical`)
 	}
-	log.Printf(ctx.calendar.String())
 	return ctx.calendar, nil
 }
 
 func (ctx *parseCtx) next() (ret string, err error) {
-	defer func() {
-		log.Printf("returning %s, %s", ret, err)
-	}()
 	if len(ctx.readbuf) > 0 {
 		l := ctx.readbuf[len(ctx.readbuf)-1]
 		ctx.readbuf = ctx.readbuf[:len(ctx.readbuf)-1]
@@ -186,7 +181,6 @@ func (ctx *parseCtx) begin(name string) (func() error, func(string) bool, error)
 	if l != "BEGIN:"+name {
 		return nil, nil, errors.Errorf(`expected BEGIN:%s, got %s`, name, l)
 	}
-	log.Printf("start of %s", name)
 
 	end := "END:" + name
 	finalizer := func() error {
@@ -198,7 +192,6 @@ func (ctx *parseCtx) begin(name string) (func() error, func(string) bool, error)
 		if l != end {
 			return errors.Errorf(`expected %s, got %s`, end, l)
 		}
-		log.Printf("end of %s", name)
 		return nil
 	}
 	checker := func(s string) bool {

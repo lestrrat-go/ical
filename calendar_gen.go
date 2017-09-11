@@ -72,3 +72,11 @@ func (v *Calendar) AddProperty(key, value string, options ...PropertyOption) err
 	}
 	return nil
 }
+
+func (v *Calendar) MarshalJSON() ([]byte, error) {
+	var dst bytes.Buffer
+	if err := NewJSONEncoder(&dst).Encode(v); err != nil {
+		return nil, errors.Wrap(err, `failed to encode json`)
+	}
+	return dst.Bytes(), nil
+}

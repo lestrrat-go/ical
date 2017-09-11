@@ -3,6 +3,7 @@ package ical_test
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"os"
 	"strings"
 	"testing"
@@ -244,5 +245,12 @@ func TestJSON(t *testing.T) {
 		return
 	}
 
-	t.Logf("%s", buf.String())
+	var buf2 bytes.Buffer
+	if !assert.NoError(t, json.NewEncoder(&buf2).Encode(c), `encode should succeed`) {
+		return
+	}
+
+	if !assert.Equal(t, buf.String(), buf2.String(), "output should match") {
+		return
+	}
 }

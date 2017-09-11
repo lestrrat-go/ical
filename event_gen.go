@@ -72,3 +72,11 @@ func (v *Event) AddProperty(key, value string, options ...PropertyOption) error 
 	}
 	return nil
 }
+
+func (v *Event) MarshalJSON() ([]byte, error) {
+	var dst bytes.Buffer
+	if err := NewJSONEncoder(&dst).Encode(v); err != nil {
+		return nil, errors.Wrap(err, `failed to encode json`)
+	}
+	return dst.Bytes(), nil
+}

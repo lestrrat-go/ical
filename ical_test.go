@@ -226,3 +226,23 @@ func TestParse(t *testing.T) {
 		return
 	}
 }
+
+func TestJSON(t *testing.T) {
+	file, ok := os.LookupEnv("ICAL_TEST_FILE")
+	if !ok {
+		return
+	}
+
+	p := ical.NewParser()
+	c, err := p.ParseFile(file)
+	if !assert.NoError(t, err, `p.Parse should succeed`) {
+		return
+	}
+
+	var buf bytes.Buffer
+	if !assert.NoError(t, ical.NewJSONEncoder(&buf).Encode(c), `encode should succeed`) {
+		return
+	}
+
+	t.Logf("%s", buf.String())
+}

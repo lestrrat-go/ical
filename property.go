@@ -78,3 +78,11 @@ func NewProperty(name, value string, params Parameters) *Property {
 func (p Property) Name() string {
 	return p.name
 }
+
+func (p Property) RawValue() string {
+	return p.value
+}
+
+func (p Property) Parameters() Parameters {
+	return p.params
+}

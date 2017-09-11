@@ -81,10 +81,10 @@ func (ctx *parseCtx) peek() (string, error) {
 
 var looksLikePropertyRe = regexp.MustCompile(`^[^:]+:.+$`)
 
-func (ctx *parseCtx) nextProperty() (string, string, error) {
+func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 	l, err := ctx.next()
 	if err != nil {
-		return "", "", errors.Wrap(err, `failed to fetch line`)
+		return "", "", nil, errors.Wrap(err, `failed to fetch line`)
 	}
 
 	pair := strings.SplitN(l, ":", 2)
@@ -100,9 +100,20 @@ func (ctx *parseCtx) nextProperty() (string, string, error) {
 		ctx.next()
 		// Remove first space
 		val += l[1:]
-
 	}
-	return n, strings.Replace(val, "\\", "", -1), nil
+
+	// name may contain parameters
+	var params = Parameters{}
+	paramslist := strings.Split(n, ";") 
+	for i, v := range paramslist {
+		if i == 0 {
+			continue
+		}
+		ppair := strings.SplitN(v, "=", 2)
+		params.Add(ppair[0], ppair[1])
+	}
+
+	return paramslist[0], strings.Replace(val, "\\", "", -1), params, nil
 }
 
 func (ctx *parseCtx) handlerFor(name string) func() error {
@@ -176,11 +187,11 @@ OUTER:
 			return finalize()
 		}
 
-		n, val, err := ctx.nextProperty()
+		n, val, params, err := ctx.nextProperty()
 		if err != nil {
 			return errors.Wrap(err, `failed to read next property`)
 		}
-		v.AddProperty(n, val)
+		v.AddProperty(n, val, WithParameters(params))
 	}
 
 	return errUnreachable

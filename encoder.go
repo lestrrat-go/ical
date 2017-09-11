@@ -1,6 +1,7 @@
 package ical
 
 import (
+	"encoding/json"
 	"io"
 	"sort"
 	"strings"
@@ -165,4 +166,52 @@ func (enc *Encoder) EncodeProperty(p *Property) error {
 	}
 	_, err := foldbuf.WriteTo(enc.dst)
 	return err
+}
+
+type JSONEncoder struct {
+	dst *json.Encoder
+}
+
+func NewJSONEncoder(dst io.Writer) *JSONEncoder {
+	return &JSONEncoder{
+		dst: json.NewEncoder(dst),
+	}
+}
+
+type jsprop struct {
+	Value      string     `json:"value"`
+	Parameters Parameters `json:"parameters,omitempty"`
+}
+type jsentry struct {
+	Type       string               `json:"type"`
+	Entries    []*jsentry           `json:"entries,omitempty"`
+	Properties map[string][]*jsprop `json:"properties,omitempty"`
+}
+
+func makeJSEntry(e Entry) *jsentry {
+	ent := &jsentry{
+		Type:       e.Type(),
+		Properties: make(map[string][]*jsprop),
+	}
+
+	for prop := range e.Properties() {
+		l, ok := ent.Properties[prop.Name()]
+		if !ok {
+			l = []*jsprop{}
+		}
+		l = append(l, &jsprop{
+			Value: prop.RawValue(),
+			Parameters: prop.Parameters(),
+		})
+		ent.Properties[prop.Name()] = l
+	}
+
+	for subent := range e.Entries() {
+		ent.Entries = append(ent.Entries, makeJSEntry(subent))
+	}
+	return ent
+}
+
+func (enc *JSONEncoder) Encode(e Entry) error {
+	return enc.dst.Encode(makeJSEntry(e))
 }

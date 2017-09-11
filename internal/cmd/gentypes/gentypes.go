@@ -181,6 +181,12 @@ func writeType(def *definition) error {
 	fmt.Fprintf(dst, "\nreturn nil")
 	fmt.Fprintf(dst, "\n}")
 
+	fmt.Fprintf(dst, "\n\nfunc (v *%s) MarshalJSON() ([]byte, error) {")
+	fmt.Fprintf(dst, "\nif err := NewJSONEncoder(dst).Encode(v); err != nil {")
+	fmt.Fprintf(dst, "\nreturn errors.Wrap(err, `failed to encode json`)")
+	fmt.Fprintf(dst, "\n}")
+	fmt.Fprintf(dst, "\n}")
+
 	formatted, err := format.Source(dst.Bytes())
 	if err != nil {
 		os.Stderr.Write(dst.Bytes())

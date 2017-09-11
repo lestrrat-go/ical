@@ -178,24 +178,31 @@ func NewJSONEncoder(dst io.Writer) *JSONEncoder {
 	}
 }
 
+type jsprop struct {
+	Value      string     `json:"value"`
+	Parameters Parameters `json:"parameters,omitempty"`
+}
 type jsentry struct {
-	Type       string
-	Entries    []*jsentry
-	Properties map[string][]string
+	Type       string               `json:"type"`
+	Entries    []*jsentry           `json:"entries,omitempty"`
+	Properties map[string][]*jsprop `json:"properties,omitempty"`
 }
 
 func makeJSEntry(e Entry) *jsentry {
 	ent := &jsentry{
-		Type: e.Type(),
-		Properties: make(map[string][]string),
+		Type:       e.Type(),
+		Properties: make(map[string][]*jsprop),
 	}
 
 	for prop := range e.Properties() {
 		l, ok := ent.Properties[prop.Name()]
 		if !ok {
-			l = []string{}
+			l = []*jsprop{}
 		}
-		l = append(l, prop.RawValue())
+		l = append(l, &jsprop{
+			Value: prop.RawValue(),
+			Parameters: prop.Parameters(),
+		})
 		ent.Properties[prop.Name()] = l
 	}
 

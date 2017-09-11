@@ -82,3 +82,7 @@ func (p Property) Name() string {
 func (p Property) RawValue() string {
 	return p.value
 }
+
+func (p Property) Parameters() Parameters {
+	return p.params
+}

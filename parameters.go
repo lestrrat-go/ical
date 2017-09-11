@@ -7,3 +7,12 @@ func (p Parameters) Get(s string) (string, bool) {
 	}
 	return "", false
 }
+
+func (p Parameters) Add(name, value string) {
+	v, ok := p[name]
+	if !ok {
+		v = []string{}
+	}
+	v = append(v, value)
+	p[name] = v
+}

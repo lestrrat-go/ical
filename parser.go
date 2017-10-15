@@ -79,7 +79,7 @@ func (ctx *parseCtx) peek() (string, error) {
 	return l, nil
 }
 
-var looksLikePropertyRe = regexp.MustCompile(`^[^:]+:.+$`)
+var looksLikePropertyRe = regexp.MustCompile(`^[^:]+:.*$`)
 
 func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 	l, err := ctx.next()
@@ -104,7 +104,7 @@ func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 
 	// name may contain parameters
 	var params = Parameters{}
-	paramslist := strings.Split(n, ";") 
+	paramslist := strings.Split(n, ";")
 	for i, v := range paramslist {
 		if i == 0 {
 			continue

@@ -5,7 +5,7 @@ package ical_test
 import (
 	"testing"
 
-	ical "github.com/lestrrat/go-ical"
+	ical "github.com/lestrrat-go/ical"
 	"github.com/stretchr/testify/assert"
 )
 

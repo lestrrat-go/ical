@@ -1,6 +1,9 @@
-# go-ical
+# ical
 
 Work with ical formatted data in Go
+
+[![Build Status](https://travis-ci.org/lestrrat-go/ical.png?branch=master)](https://travis-ci.org/lestrrat-go/ical)
+[![GoDoc](https://godoc.org/github.com/lestrrat-go/ical?status.svg)](https://godoc.org/github.com/lestrrat-go/ical)
 
 # DESCRIPTION
 
@@ -9,7 +12,7 @@ This is partially a port of Data::ICal (perl5 module) to Go.
 Parse an ics file:
 
 ```go
-import "github.com/lestrrat/go-ical"
+import "github.com/lestrrat-go/ical"
 
 // snip...
 p := ical.NewParser()
@@ -29,7 +32,7 @@ for e := range c.Entries() {
 Programatically generate a Calendar
 
 ```go
-import "github.com/lestrrat/go-ical"
+import "github.com/lestrrat-go/ical"
 
 // snip...
 c := ical.New()

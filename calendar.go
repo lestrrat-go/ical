@@ -5,7 +5,7 @@ func New(options ...Option) *Calendar {
 		props: NewPropertySet(),
 	}
 
-	c.AddProperty("prodid", "github.com/lestrrat/go-ical")
+	c.AddProperty("prodid", "github.com/lestrrat-go/ical")
 	c.AddProperty("version", "2.0")
 
 	for _, opt := range options {

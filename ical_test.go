@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	ical "github.com/lestrrat/go-ical"
+	ical "github.com/lestrrat-go/ical"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +39,7 @@ func TestSimpleGen(t *testing.T) {
 		expect := strings.Join([]string{
 			"BEGIN:VCALENDAR",
 			"VERSION:2.0",
-			"PRODID:github.com/lestrrat/go-ical",
+			"PRODID:github.com/lestrrat-go/ical",
 			"BEGIN:VTODO",
 			"COMMENT:a first comment",
 			"COMMENT:a second comment",
@@ -60,7 +60,7 @@ func TestSimpleGen(t *testing.T) {
 		expect := strings.Join([]string{
 			`BEGIN:VCALENDAR`,
 			`VERSION:2.0`,
-			`PRODID:github.com/lestrrat/go-ical`,
+			`PRODID:github.com/lestrrat-go/ical`,
 			`BEGIN:VTODO`,
 			`COMMENT:a first comment`,
 			`COMMENT:a second comment`,
@@ -83,7 +83,7 @@ func TestSimpleGen(t *testing.T) {
 		expect := strings.Join([]string{
 			`BEGIN:VCALENDAR`,
 			`VERSION:2.0`,
-			`PRODID:github.com/lestrrat/go-ical`,
+			`PRODID:github.com/lestrrat-go/ical`,
 			`BEGIN:VTODO`,
 			`COMMENT:a first comment`,
 			`COMMENT:a second comment`,

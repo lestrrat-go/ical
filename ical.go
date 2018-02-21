@@ -3,7 +3,7 @@
 package ical
 
 import (
-	bufferpool "github.com/lestrrat/go-bufferpool"
+	bufferpool "github.com/lestrrat-go/bufferpool"
 )
 
 var bufferPool = bufferpool.New()

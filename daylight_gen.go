@@ -61,7 +61,7 @@ func (v *Daylight) AddProperty(key, value string, options ...PropertyOption) err
 	}
 
 	switch key = strings.ToLower(key); key {
-	case "dtstart", "tzeoffsetto", "tzeoffsetfrom":
+	case "dtstart", "tzoffsetto", "tzoffsetfrom":
 		v.props.Set(NewProperty(key, value, params))
 	case "comment", "rdate", "rrule", "tzname":
 		v.props.Append(NewProperty(key, value, params))

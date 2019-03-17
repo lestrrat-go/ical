@@ -93,8 +93,8 @@
     "type": "DAYLIGHT",
     "mandatory_unique_properties": [
       "dtstart",
-      "tzeoffsetto",
-      "tzeoffsetfrom"
+      "tzoffsetto",
+      "tzoffsetfrom"
     ],
     "optional_repeatable_properties": [
       "comment",
@@ -108,8 +108,8 @@
     "type": "STANDARD",
     "mandatory_unique_properties": [
       "dtstart",
-      "tzeoffsetto",
-      "tzeoffsetfrom"
+      "tzoffsetto",
+      "tzoffsetfrom"
     ],
     "optional_repeatable_properties": [
       "comment",

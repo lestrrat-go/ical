@@ -87,20 +87,21 @@ func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 		return "", "", nil, errors.Wrap(err, `failed to fetch line`)
 	}
 
-	pair := strings.SplitN(l, ":", 2)
-	n, val := pair[0], pair[1]
 	for {
-		l, err = ctx.peek()
+		nl, err = ctx.peek()
 		if err != nil {
 			break // EOF? oh well
 		}
-		if looksLikePropertyRe.MatchString(l) {
+		if looksLikePropertyRe.MatchString(nl) {
 			break
 		}
 		ctx.next()
 		// Remove first space
-		val += l[1:]
+		l += nl[1:]
 	}
+
+	pair := strings.SplitN(l, ":", 2)
+	n, val := pair[0], pair[1]
 
 	// name may contain parameters
 	var params = Parameters{}

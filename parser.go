@@ -104,7 +104,10 @@ func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 		}
 		ctx.next()
 		// Remove first space
-		val += l[1:]
+		
+		if len(l) > 1 {
+			val += l[1:]
+		}
 	}
 
 	// name may contain parameters

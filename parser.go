@@ -86,7 +86,12 @@ func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 	if err != nil {
 		return "", "", nil, errors.Wrap(err, `failed to fetch line`)
 	}
-
+	
+	//add support (skip) empty lines
+	if len(l) == 0 || !strings.Contains(l, ":") {
+		return "", "", nil, nil
+	}
+	
 	pair := strings.SplitN(l, ":", 2)
 	n, val := pair[0], pair[1]
 	for {
@@ -99,7 +104,10 @@ func (ctx *parseCtx) nextProperty() (string, string, Parameters, error) {
 		}
 		ctx.next()
 		// Remove first space
-		val += l[1:]
+		
+		if len(l) > 1 {
+			val += l[1:]
+		}
 	}
 
 	// name may contain parameters
